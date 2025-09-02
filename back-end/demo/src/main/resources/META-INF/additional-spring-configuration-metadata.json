@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "app.storage.root",
+  "type": "java.lang.String",
+  "description": "Root folder for file data storage"
+}]}
