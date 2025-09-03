@@ -1,23 +1,81 @@
 package com.personalDrive.model;
 
+import java.time.Instant;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(
+    name = "file",
+    indexes = {
+        @Index(name = "idx_file_folder", columnList = "folder_id")
+    }
+)
 public class File {
-    // @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // private Long id;
-    // private String name;
-    // private String description;
-    // private double price;
+    // columns
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // // Getters and Setters
-    // public Long getId() { return id; }
-    // public void setId(Long id) { this.id = id; }
+    @ManyToOne(fetch = FetchType.LAZY, optional =  false)
+    @JoinColumn(name = "folder_id", nullable = false)
+    private Folder folder;
 
-    // public String getName() { return name; }
-    // public void setName(String name) { this.name = name; }
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
-    // public String getDescription() { return description; }
-    // public void setDescription(String description) { this.description = description; }
+    @Column(nullable = false)
+    private String name;
 
-    // public double getPrice() { return price; }
-    // public void setPrice(double price) { this.price = price; }
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    // lifetime funcs
+    @PrePersist
+    void onCreate() {
+        var now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
+
+
+    // getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Folder getFolder() { return folder; }
+    public void setFolder(Folder folder) { this.folder = folder; }
+
+    public User getOwner() { return owner; }
+    public void setOwner(User owner) { this.owner = owner; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }
+
