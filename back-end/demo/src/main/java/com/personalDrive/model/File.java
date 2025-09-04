@@ -45,6 +45,10 @@ public class File {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "blob_id", nullable = false)
+    private Blob blob;
+
     // lifetime funcs
     @PrePersist
     void onCreate() {
@@ -57,7 +61,6 @@ public class File {
     void onUpdate() {
         this.updatedAt = Instant.now();
     }
-
 
     // getters and setters
     public Long getId() { return id; }
@@ -77,5 +80,8 @@ public class File {
 
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+
+    public Blob getBlob() { return blob; }
+    public void setBlob(Blob blob) { this.blob = blob;}
 }
 
