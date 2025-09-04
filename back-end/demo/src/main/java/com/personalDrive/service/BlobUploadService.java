@@ -10,14 +10,40 @@ import java.nio.file.StandardCopyOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.personalDrive.apiErrorHandler.StorageException;
+import com.personalDrive.model.Blob;
+import com.personalDrive.model.BlobDTOs.BlobDTO;
+import com.personalDrive.model.BlobDTOs.BlobResponse;
+import com.personalDrive.repository.BlobRepository;
+
 
 @Service
-public class DiskBlobStoreService implements BlobService {
+public class BlobUploadService implements BlobService {
     private final Path root = Path.of(System.getProperty("APP_STORAGE_ROOT", "/drive-data/blobs"));
+    private final BlobRepository blobRepository;
 
-    public record BlobDTO(String sha256, long size, String contentType, String storagePath) {}
+    public BlobUploadService(BlobRepository blobRepository) {
+        this.blobRepository = blobRepository;
+    }
 
+    @Override
+    public BlobResponse uploadAndRegister(InputStream in, String contententType) {
+        BlobDTO response;
+
+        try {
+            response = store(in, contententType);
+        } catch (Exception e) {
+            throw new StorageException("Failed to write blob to disk.", e); 
+        }
+        Blob blob = upsertBlobRow(response); 
+        return new BlobResponse(blob.getId(), blob.getSha256(), blob.getSize(), blob.getContentType(), blob.getStoragePath());
+    }
+
+    @Override
     public BlobDTO store(InputStream in, String contentType) throws Exception {
         Files.createDirectories(root.resolve("tmp"));
 
@@ -54,12 +80,30 @@ public class DiskBlobStoreService implements BlobService {
         try {
             Files.move(tmp, finalPath, StandardCopyOption.ATOMIC_MOVE);
         } catch (FileAlreadyExistsException e) {
-            Files.deleteIfExists(tmp);                          // same content uploaded before
+            Files.deleteIfExists(tmp); 
         }
 
         String ct = (contentType == null || contentType.isBlank()) ? "application/octet-stream" : contentType;
         return new BlobDTO(sha, size, ct, shard + "/" + sha);
     }
+
+	@Override
+    @Transactional
+	public Blob upsertBlobRow(BlobDTO response) {
+        return blobRepository.findBySha256(response.sha256()).orElseGet(() -> {
+            Blob b = new com.personalDrive.model.Blob();
+            b.setSha256(response.sha256());
+            b.setSize(response.size());
+            b.setContentType(response.contentType());
+            b.setStoragePath(response.storagePath());
+
+            try {
+                return blobRepository.saveAndFlush(b);
+            } catch (DataIntegrityViolationException race) {
+                return blobRepository.findBySha256(response.sha256()).orElseThrow();
+            }
+        });
+	}
 
     private static String toHex(byte[] b) {
         var sb = new StringBuilder(b.length * 2);

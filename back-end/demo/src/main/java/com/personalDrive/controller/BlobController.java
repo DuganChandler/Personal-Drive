@@ -5,31 +5,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.personalDrive.service.DiskBlobStoreService;
+import com.personalDrive.model.BlobDTOs.BlobResponse;
+import com.personalDrive.service.BlobUploadService;
 
 import java.io.InputStream;
+import java.net.URI;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
-@RequestMapping("api/blobs")
+@RequestMapping("api/upload")
 public class BlobController {
-    private final DiskBlobStoreService diskBlobStoreService;
+    private final BlobUploadService blobService;
     
-    public BlobController(DiskBlobStoreService diskBlobStoreService) {
-        this.diskBlobStoreService = diskBlobStoreService;
+    public BlobController(BlobUploadService blobService) {
+        this.blobService = blobService;
     }
     
-    @PostMapping(path = "/multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public BlobResponse uploadMultipart(@RequestParam("file") MultipartFile part) throws Exception {
-        try (InputStream in = part.getInputStream()) {
-            // return diskBlobStoreService.store(in, part.getContentType()).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.internalServerError().build());
-            DiskBlobStoreService.BlobDTO stored = diskBlobStoreService.store(in, part.getContentType());
-            return new BlobResponse(stored.sha256(), stored.size(), stored.contentType(), stored.storagePath());
+    @PostMapping(path = "blob/multipart", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BlobResponse> uploadMultipart(@RequestParam("file") MultipartFile file) throws Exception {
+        try (InputStream in = file.getInputStream()) {
+            BlobResponse response = blobService.uploadAndRegister(in, file.getContentType());
+            return ResponseEntity.created(URI.create("api/blobs" + response.id())).body(response);
         }
     }
-
-  public record BlobResponse(String sha256, long sizeBytes, String contentType, String storagePath) {}
 }

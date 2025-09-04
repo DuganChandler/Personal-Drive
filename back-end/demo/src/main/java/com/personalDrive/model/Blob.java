@@ -48,8 +48,8 @@ public class Blob {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getHash() { return sha256; }
-    public void setHash(String sha256) { this.sha256 = sha256; }
+    public String getSha256() { return sha256; }
+    public void setSha256(String sha256) { this.sha256 = sha256; }
 
     public Long getSize() { return sizeBytes; }
     public void setSize(Long sizeBytes) { this.sizeBytes = sizeBytes; }
