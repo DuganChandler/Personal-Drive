@@ -36,8 +36,8 @@ public class Folder {
     @OneToMany(mappedBy = "parent")
     private Set<Folder> children = new LinkedHashSet<>();
 
-    @Column(name = "is_trashed", nullable = false)
-    private boolean trashed = false;
+    // @Column(name = "is_trashed", nullable = false)
+    // private boolean trashed = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -74,8 +74,8 @@ public class Folder {
     public Set<Folder> getChildren() { return children; }
     public void setChildren(Set<Folder> children) { this.children = children; }
 
-    public boolean isTrashed() { return trashed; }
-    public void setTrashed(boolean trashed) { this.trashed = trashed; }
+    // public boolean isTrashed() { return trashed; }
+    // public void setTrashed(boolean trashed) { this.trashed = trashed; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
