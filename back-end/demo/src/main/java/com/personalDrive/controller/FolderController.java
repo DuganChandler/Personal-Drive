@@ -20,12 +20,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
-
 @RestController
 @RequestMapping("api/folders")
 public class FolderController {
-    private final FolderServiceFunc folderServiceFunc; 
+    private final FolderServiceFunc folderServiceFunc;
 
     public FolderController(FolderServiceFunc folderServiceFunc) {
         this.folderServiceFunc = folderServiceFunc;
@@ -45,11 +43,11 @@ public class FolderController {
 
     @GetMapping("/{id}/children")
     public ResponseEntity<List<FolderChild>> getChildren(@PathVariable Long id,
-                                                         @RequestParam Long ownerId,
-                                                         @RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "50") int size) {
+            @RequestParam Long ownerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
         List<FolderChild> resp = folderServiceFunc.listChildren(ownerId, id, page, size);
         return ResponseEntity.ok(resp);
     }
-    
+
 }

@@ -6,5 +6,6 @@ import com.personalDrive.model.FolderDTOs.GetFolderReq;
 
 public interface FolderService {
     public FolderResponse createFolder(CreateFolderReq req);
+
     public FolderResponse getFolder(GetFolderReq req);
 }

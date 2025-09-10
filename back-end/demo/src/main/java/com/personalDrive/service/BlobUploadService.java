@@ -20,7 +20,6 @@ import com.personalDrive.model.BlobDTOs.BlobDTO;
 import com.personalDrive.model.BlobDTOs.BlobResponse;
 import com.personalDrive.repository.BlobRepository;
 
-
 @Service
 public class BlobUploadService implements BlobService {
     private final Path root = Path.of(System.getProperty("APP_STORAGE_ROOT", "/drive-data/blobs"));
@@ -37,10 +36,11 @@ public class BlobUploadService implements BlobService {
         try {
             response = store(in, contententType);
         } catch (Exception e) {
-            throw new StorageException("Failed to write blob to disk.", e); 
+            throw new StorageException("Failed to write blob to disk.", e);
         }
-        Blob blob = upsertBlobRow(response); 
-        return new BlobResponse(blob.getId(), blob.getSha256(), blob.getSize(), blob.getContentType(), blob.getStoragePath());
+        Blob blob = upsertBlobRow(response);
+        return new BlobResponse(blob.getId(), blob.getSha256(), blob.getSize(), blob.getContentType(),
+                blob.getStoragePath());
     }
 
     @Override
@@ -53,11 +53,11 @@ public class BlobUploadService implements BlobService {
         long size = 0;
 
         try (FileOutputStream fileOutputStream = new FileOutputStream(tmp.toFile());
-            FileChannel channel = fileOutputStream.getChannel();
-            DigestInputStream digestInputStream = new DigestInputStream(in, md)) {
+                FileChannel channel = fileOutputStream.getChannel();
+                DigestInputStream digestInputStream = new DigestInputStream(in, md)) {
 
             byte[] buffer = new byte[1024 * 1024];
-            int r; 
+            int r;
             while ((r = digestInputStream.read(buffer)) != -1) {
                 fileOutputStream.write(buffer, 0, r);
                 size += r;
@@ -71,7 +71,7 @@ public class BlobUploadService implements BlobService {
 
         // get final locale from hash (content-addressed)
         String sha = toHex(md.digest());
-        String shard = sha.substring(0,2) + "/" + sha.substring(2,4);
+        String shard = sha.substring(0, 2) + "/" + sha.substring(2, 4);
         Path dir = root.resolve(shard);
         Files.createDirectories(dir);
         Path finalPath = dir.resolve(sha);
@@ -80,16 +80,16 @@ public class BlobUploadService implements BlobService {
         try {
             Files.move(tmp, finalPath, StandardCopyOption.ATOMIC_MOVE);
         } catch (FileAlreadyExistsException e) {
-            Files.deleteIfExists(tmp); 
+            Files.deleteIfExists(tmp);
         }
 
         String ct = (contentType == null || contentType.isBlank()) ? "application/octet-stream" : contentType;
         return new BlobDTO(sha, size, ct, shard + "/" + sha);
     }
 
-	@Override
+    @Override
     @Transactional
-	public Blob upsertBlobRow(BlobDTO response) {
+    public Blob upsertBlobRow(BlobDTO response) {
         return blobRepository.findBySha256(response.sha256()).orElseGet(() -> {
             Blob b = new com.personalDrive.model.Blob();
             b.setSha256(response.sha256());
@@ -103,11 +103,12 @@ public class BlobUploadService implements BlobService {
                 return blobRepository.findBySha256(response.sha256()).orElseThrow();
             }
         });
-	}
+    }
 
     private static String toHex(byte[] b) {
         var sb = new StringBuilder(b.length * 2);
-        for (byte x : b) sb.append(String.format("%02x", x));
+        for (byte x : b)
+            sb.append(String.format("%02x", x));
         return sb.toString();
     }
 }
