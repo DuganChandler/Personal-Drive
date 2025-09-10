@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.personalDrive.model.FolderDTOs.BreadCrumb;
 import com.personalDrive.model.FolderDTOs.CreateFolderReq;
 import com.personalDrive.model.FolderDTOs.FolderChild;
 import com.personalDrive.model.FolderDTOs.FolderResponse;
@@ -49,5 +50,12 @@ public class FolderController {
         List<FolderChild> resp = folderServiceFunc.listChildren(ownerId, id, page, size);
         return ResponseEntity.ok(resp);
     }
+
+    @GetMapping("/{id}/breadcrumbs")
+    public ResponseEntity<List<BreadCrumb>> getMethodName(@PathVariable Long id, @RequestParam Long ownerId) {
+        List<BreadCrumb> resp = folderServiceFunc.listBreadCrumbs(id, ownerId); 
+        return ResponseEntity.ok(resp);
+    }
+    
 
 }

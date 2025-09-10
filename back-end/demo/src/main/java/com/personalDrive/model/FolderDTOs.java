@@ -12,4 +12,7 @@ public class FolderDTOs {
 
     public record FolderChild(Long id, Long parentId, String name) {
     }
+
+    public record BreadCrumb(Long folderId, String folderName){
+    }
 }
