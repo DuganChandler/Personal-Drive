@@ -16,24 +16,24 @@ public interface FolderRepository extends JpaRepository<Folder, Long> {
 
     Page<Folder> findByOwner_IdAndParent_Id(Long ownerId, Long parentId, Pageable pageable);
 
-    @Query( value = """
-        WITH RECURSIVE 
-        bc AS 
-        (
-            SELECT f.id, f.parent_id, f.name, 1 AS depth
-            FROM folder f
-            WHERE f.id = :folderId AND f.owner_id = :ownerId
+    @Query(value = """
+                WITH RECURSIVE
+                bc AS
+                (
+                    SELECT f.id, f.parent_id, f.name, 1 AS depth
+                    FROM folder f
+                    WHERE f.id = :folderId AND f.owner_id = :ownerId
 
-            UNION ALL
+                    UNION ALL
 
-            SELECT pf.id, pf.parent_id, pf.name, bc.depth + 1
-            FROM folder pf
-            JOIN bc ON pf.id = bc.parent_id
-            WHERE pf.owner_id = :ownerId
-        ) 
-        SELECT id, name
-        FROM bc
-        ORDER BY depth DESC;
-    """, nativeQuery = true)
+                    SELECT pf.id, pf.parent_id, pf.name, bc.depth + 1
+                    FROM folder pf
+                    JOIN bc ON pf.id = bc.parent_id
+                    WHERE pf.owner_id = :ownerId
+                )
+                SELECT id, name
+                FROM bc
+                ORDER BY depth DESC;
+            """, nativeQuery = true)
     Optional<List<BreadCrumb>> findBreadCrumbs(Long folderId, Long ownerId);
 }

@@ -53,9 +53,8 @@ public class FolderController {
 
     @GetMapping("/{id}/breadcrumbs")
     public ResponseEntity<List<BreadCrumb>> getMethodName(@PathVariable Long id, @RequestParam Long ownerId) {
-        List<BreadCrumb> resp = folderServiceFunc.listBreadCrumbs(id, ownerId); 
+        List<BreadCrumb> resp = folderServiceFunc.listBreadCrumbs(id, ownerId);
         return ResponseEntity.ok(resp);
     }
-    
 
 }
