@@ -1,6 +1,7 @@
 package com.personalDrive.service;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.nio.file.FileAlreadyExistsException;
@@ -21,11 +22,11 @@ import com.personalDrive.model.BlobDTOs.BlobResponse;
 import com.personalDrive.repository.BlobRepository;
 
 @Service
-public class BlobUploadService implements BlobService {
+public class BlobServiceFunc implements BlobService {
     private final Path root = Path.of(System.getProperty("APP_STORAGE_ROOT", "/drive-data/blobs"));
     private final BlobRepository blobRepository;
 
-    public BlobUploadService(BlobRepository blobRepository) {
+    public BlobServiceFunc(BlobRepository blobRepository) {
         this.blobRepository = blobRepository;
     }
 
@@ -103,6 +104,15 @@ public class BlobUploadService implements BlobService {
                 return blobRepository.findBySha256(response.sha256()).orElseThrow();
             }
         });
+    }
+
+    public void open(String storagePath, java.util.function.Consumer<InputStream> reader) {
+        Path full = root.resolve(storagePath);
+        try (InputStream in = Files.newInputStream(full)) {
+            reader.accept(in);
+        } catch (IOException e) {
+            throw new StorageException("Failed to read blob", e);
+        }
     }
 
     private static String toHex(byte[] b) {

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.personalDrive.model.BlobDTOs.BlobResponse;
-import com.personalDrive.service.BlobUploadService;
+import com.personalDrive.service.BlobServiceFunc;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RestController
 @RequestMapping("api/upload")
 public class BlobController {
-    private final BlobUploadService blobService;
+    private final BlobServiceFunc blobService;
     
-    public BlobController(BlobUploadService blobService) {
+    public BlobController(BlobServiceFunc blobService) {
         this.blobService = blobService;
     }
     
