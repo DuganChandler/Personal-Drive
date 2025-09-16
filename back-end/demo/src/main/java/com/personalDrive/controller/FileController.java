@@ -40,7 +40,7 @@ public class FileController {
         return ResponseEntity.created(URI.create("api/files" + resp.id())).body(resp);
     }
 
-    @GetMapping("/{folderId}/files")
+    @GetMapping("/{folderId}/list")
     public ResponseEntity<List<FileInfo>> listFilesInFolder(@PathVariable Long folderId, @RequestParam Long ownerId,
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) {
         List<FileInfo> resp = fileServiceFunc.listFiles(folderId, ownerId, page, size, null);
